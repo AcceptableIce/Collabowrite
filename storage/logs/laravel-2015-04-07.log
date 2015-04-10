@@ -1,0 +1,21 @@
+[2015-04-07 23:14:12] production.ERROR: exception 'Symfony\Component\Debug\Exception\FatalErrorException' with message 'Cannot redeclare class CreateUsersTable' in /home/heytherejake/collabowrite/database/migrations/2015_04_07_231105_create_users_table.php:35
+Stack trace:
+#0 {main}  
+[2015-04-07 23:14:43] production.ERROR: exception 'Symfony\Component\Debug\Exception\FatalErrorException' with message 'Cannot redeclare class CreateUsersTable' in /home/heytherejake/collabowrite/database/migrations/2015_04_07_231105_create_users_table.php:35
+Stack trace:
+#0 {main}  
+[2015-04-07 23:15:37] production.ERROR: exception 'Symfony\Component\Debug\Exception\FatalErrorException' with message 'Cannot redeclare class CreateUsersTable' in /home/heytherejake/collabowrite/database/migrations/2015_04_07_231105_create_users_table.php:35
+Stack trace:
+#0 {main}  
+[2015-04-07 23:15:55] production.ERROR: exception 'Symfony\Component\Debug\Exception\FatalErrorException' with message 'Cannot redeclare class CreateUsersTable' in /home/heytherejake/collabowrite/database/migrations/2015_04_07_231105_create_users_table.php:35
+Stack trace:
+#0 {main}  
+[2015-04-07 23:16:05] production.ERROR: exception 'Symfony\Component\Debug\Exception\FatalErrorException' with message 'Cannot redeclare class CreateUsersTable' in /home/heytherejake/collabowrite/database/migrations/2015_04_07_231105_create_users_table.php:35
+Stack trace:
+#0 {main}  
+[2015-04-07 23:20:09] production.ERROR: exception 'Symfony\Component\Debug\Exception\FatalErrorException' with message 'Cannot redeclare class CreateUsersTable' in /home/heytherejake/collabowrite/database/migrations/2015_04_07_231105_create_users_table.php:35
+Stack trace:
+#0 {main}  
+[2015-04-07 23:30:50] production.ERROR: exception 'Symfony\Component\Debug\Exception\FatalErrorException' with message 'syntax error, unexpected 'public' (T_PUBLIC)' in /home/heytherejake/collabowrite/database/migrations/2015_04_07_232453_create_stories_table.php:26
+Stack trace:
+#0 {main}  
