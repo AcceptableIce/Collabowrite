@@ -9,4 +9,8 @@ class Sentence extends Model {
 	public function children() {
 		return Sentence::where('sentence_id', $this->id);
 	}
+	
+	public function comments() {
+		return Comment::where('sentence_id', $this->id);
+	}
 }

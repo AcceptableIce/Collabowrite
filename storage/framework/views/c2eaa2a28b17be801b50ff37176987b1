@@ -5,11 +5,17 @@
 		self.storyTree = ko.observable(<?php echo json_encode($story->buildTree()) ?>);
 		self.editingTier = ko.observable(-9);
 		self.editingValue = ko.observable("");
+		self.viewingCommentTier = ko.observable(-9);
+		self.commentEditorVisible = ko.observable(false);
+		self.commentValue = ko.observable("");
+		self.comments = ko.observableArray([]);
+		self.commentsLoaded = ko.observable(false);
 		self.editingParentId = ko.observable(-1);
 		//Modify the story tree to have observables
 	
 		function modifyStoryTree(root) {
 			root.selected = ko.observable(root.selected);
+			root.comment_count = ko.observable(root.comment_count);
 			for(var i = 0; i < root.children.length; i++) {
 				var child = root.children[i];
 				modifyStoryTree(child);
@@ -51,6 +57,79 @@
 			self.editingValue("");
 			self.editingParentId(id);
 			self.editingTier(tier);
+			self.viewingCommentTier(-9);
+		}
+
+		self.showComments = function(tier, id) {
+			self.viewingCommentTier(tier);
+			self.commentsLoaded(false);
+			$.get('/api/v1/sentence/' + id + '/comments', function(data) {
+				self.comments(data);
+				self.commentsLoaded(true);
+			});
+			self.editingTier(-9);
+		}
+
+		self.hideComments = function() {
+			self.viewingCommentTier(-1);
+			self.commentsLoaded(false);
+		}
+
+		self.showCommentEditor = function(sentenceId) {
+			if(self.commentsLoaded()) {
+				self.editingParentId(sentenceId);
+				self.commentEditorVisible(true);
+			}
+		}
+
+		self.cancelCommentInput = function() {
+			self.commentValue("");
+			self.editingParentId(-1);
+			self.commentEditorVisible(false);
+		}
+
+		self.submitCommentInput = function() {
+			$.ajax('/api/v1/sentence/' + self.editingParentId() + '/comment', {
+				data: {
+					content: self.commentValue()
+				},
+				method: 'POST',
+				success: function(data) {
+					console.log('Comment submitted!');
+					self.comments.push({
+						content: self.commentValue(),
+						user: {
+							name: $('#user-name').val()
+						}
+					});
+					var row = self.goToTier(self.viewingCommentTier());
+					row.comment_count(row.comment_count() + 1);
+					self.commentValue("");
+				},
+				error: function(jqXHR, textStatus, errorThrown) {
+					console.log('Comment submit error', jqXHR);
+				}
+			});
+		}
+
+		self.escapeHtml = function(dirty) {
+			var entityMap = {
+				"&": "&amp;",
+				"<": "&lt;",
+				">": "&gt;",
+				'"': '&quot;',
+				"'": '&#39;',
+				"/": '&#x2F;'
+			};
+
+			return String(dirty).replace(/[&<>"'\/]/g, function (s) {
+				return entityMap[s];
+			});
+		}
+
+		self.formatComment = function(raw) {
+			var clean = self.escapeHtml(raw);
+			return marked(clean);
 		}
 		
 		self.cancelSentenceInput = function() {
@@ -90,6 +169,7 @@
 <?php $__env->stopSection(); ?>
 
 <?php $__env->startSection('content'); ?>
+	<input type="hidden" id="user-name" value="<?php echo e(Auth::user() != null ? Auth::user()->name : 'Unauthed'); ?>" />
 	<div class="author-block">This is a story that was started <?php echo e($story->created_at->diffForHumans()); ?> by <?php echo e($story->owner()->name); ?>.</div>
 	<div class="story-block">
 		<!-- ko foreach: buildPath -->
@@ -100,19 +180,44 @@
 					<!-- ko if: $index() > 0 -->
 					<div class="button tier-button tier-shift-left" data-bind="click: function() { $root.shiftTier($index(), -1) }, css: {'disabled': $root.buildPath()[$index() - 1].children.length < 2}">&#8592;</div>
 					<!-- /ko -->
-					
-					<div class="button tier-button reply-to-tier" data-bind="click: function() { $root.startEditing($index(), $data.id) }">Reply</div>
-					
+					<div class="button-container">
+						<div class="contained-button reply-to-tier" data-bind="click: function() { $root.startEditing($index(), $data.id) }">Reply</div>
+						<div class="contained-button reply-to-tier" data-bind="click: function() { $root.showComments($index(), $data.id) }, text: 'Comments (' + comment_count() + ')'">Comments</div>
+					</div>
 					<!-- ko if: $index() > 0 -->
 						<div class="button tier-button tier-shift-right"  data-bind="click: function() { $root.shiftTier($index(), 1) }, css: {'disabled': $root.buildPath()[$index() - 1].children.length < 2}">&#8594;</div>
 					<!-- /ko -->
 				</div>
 				<div class="row edit-row" data-bind="visible: $root.editingTier() + 1 == $index()">
 					<div class="sentence-input-copy">Write a reply to the line above.</div>
-					<input type="text" class="sentence-input" data-bind="value: $root.editingValue" />
+					<input type="text" class="sentence-input" data-bind="value: $root.editingValue"/>
 					<div class="button tier-button cancel-sentence-submit" data-bind="click: $root.cancelSentenceInput">Cancel</div>
 					<div class="button tier-button confirm-sentence-submit" data-bind="click: $root.submitSentenceInput">Submit</div>
 
+				</div>
+				<div class="row comment-row" data-bind="visible: $root.viewingCommentTier() == $index()">
+					<div class="comment-section" data-bind="visible: $root.commentsLoaded">
+						<div class="comments" data-bind="foreach: $root.comments">
+							<div class="comment">
+								<span class="comment-user" data-bind="text: $data.user.name + ' says:'"></span><br/>
+								<span class="comment-comment" data-bind="html: $root.formatComment($data.content)"></span>
+							</div>
+						</div>
+						<div class="button-container addclose-button-container">
+							<div class="button add-comment" data-bind="click: $root.showCommentEditor($data.id)">Add comment</div>
+							<div class="button hide-comments" data-bind="click: $root.hideComments">Close</div>
+						</div>
+						<div class="comment-editor" data-bind="visible: $root.commentEditorVisible">
+							<input type="text" class="sentence-input" data-bind="value: $root.commentValue"/>
+							<div class="button-container comment-button-container">
+								<div class="button tier-button cancel-sentence-submit" data-bind="click: $root.cancelCommentInput">Cancel</div>
+								<div class="button tier-button confirm-sentence-submit" data-bind="click: $root.submitCommentInput">Submit</div>
+							</div>
+						</div>
+					</div>
+					<div class="loader" data-bind="visible: !$root.commentsLoaded()">
+						<span class="loader">Loading. Imagine something spinning here.</span>
+					</div>
 				</div>
 			</div>
 		</div>

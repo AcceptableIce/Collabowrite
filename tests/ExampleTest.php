@@ -1,6 +1,7 @@
 <?php
 use App\User;
 use App\Models\Story;
+use App\Models\Comment;
 use Symfony\Component\DomCrawler\Crawler;
 
 class ExampleTest extends TestCase {
@@ -63,5 +64,24 @@ class ExampleTest extends TestCase {
 
 		// delete it
 		Story::find($newStoryId)->delete();
+	}
+	
+	public function testNewComment() {
+		Auth::loginUsingId(2);
+		$response = $this->call('GET', '/');
+		$this->assertResponseOk();
+		$html = $response->getContent();
+		// extract the csrf token
+
+		$crawler = new Crawler($html);
+		$token = $crawler->filter('input[name="_token"]')->attr('value');
+		
+		$response = $this->call('POST', '/api/v1/sentence/1/comment', ['content' => 'Test!', '_token' => $token]);
+		$newCommentId = json_decode($response->getContent())->id;
+		// there isn't currently a decent way to actually get the data that was returned, so just make sure it's ok
+		$this->assertResponseOk();
+
+		// delete it
+		Comment::find($newCommentId)->delete();
 	}
 }

@@ -18,14 +18,14 @@ class Story extends Model {
 	
 	public function buildTree() {
 		$rootVal = $this->getRoot()->first();
-		$root = array("content" => $rootVal->content, "selected" => 0, "id" => $rootVal->id, "children" => array());
+		$root = array("content" => $rootVal->content, "selected" => 0, "id" => $rootVal->id, "comment_count" => $rootVal->comments()->count(), "children" => array());
 		$this->buildTreeLevel($rootVal, $root);
 		return $root;
 	}
 	
 	public function buildTreeLevel($item, &$parent) {
 		foreach($item->children()->get() as $c) {
-			$newTreeItem = array("content" => $c->content, "selected" => 0, "id" => $c->id, "children" => array());
+			$newTreeItem = array("content" => $c->content, "selected" => 0, "id" => $c->id, "comment_count" => $c->comments()->count(), "children" => array());
 			$this->buildTreeLevel($c, $newTreeItem);
 			$parent["children"][] = $newTreeItem;
 		}

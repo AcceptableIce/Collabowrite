@@ -98,6 +98,38 @@ body {
     color: #ccc;
 }
 
+.tier-0 .button-container {
+	font-size: .5em;
+}
+
+.button-container {
+	position: relative;
+	width: 400px;
+	height: 40px;
+	margin-top: 5px;
+	font-size: .75em;
+	left: calc(50% - 200px);
+}
+
+.contained-button {
+	width: 150px;
+	height: 40px;
+	border-radius: 3px;
+	border: none;
+	border-bottom: 2px solid #fff;
+	color: #fff;
+	line-height: 35px;
+	text-align: center;
+	font-weight: 700;
+	/*margin-left: -50px;
+	margin-top: 20px;*/
+	cursor: pointer;
+	background-color: #641a1a;
+	border-color: #d05757;
+	user-select: none;
+	display: inline-block;
+}
+
 .button {
 	width: 100px;
 	height: 40px;
@@ -156,7 +188,7 @@ body {
 
 .tier-0 {
 	font-size: 3em;
-	height: 120px;
+	min-height: 120px;
 }
 
 .tier-button {
@@ -176,6 +208,7 @@ body {
 	right: 0;
 	left: auto;
 	margin-left: 0;
+	margin-top: -35px;
 }
 
 .author-block {
@@ -228,4 +261,62 @@ body {
 
 .last-tier {
 	background-color: transparent !important;
+}
+
+.add-comment {
+	font-size: .8em;
+	width: 200px;
+	display: inline-block;
+	margin: 0;
+	left: 0;
+}
+
+.hide-comments {
+	font-size: .8em;
+	width: 200px;
+	display: inline-block;
+	margin: 0;
+	left: 0;
+}
+
+.addclose-button-container {
+	width: 500px;
+	left: calc(50% - 250px);
+}
+
+.comment:not(:first-child) {
+	border-top: 1px dotted grey;
+}
+
+.comment-button-container {
+	margin-top: 20px;
+}
+
+.user-container {
+	color: white;
+}
+
+.description {
+	max-width: 600px;
+}
+
+.description-box {
+	width: 600px;
+	height: 200px;
+}
+
+.block-field {
+	display: block;
+}
+
+#description-input {
+	display: none;
+}
+
+.user-container input {
+	color: black;
+}
+
+.user-container textarea {
+	color: black;
 }
