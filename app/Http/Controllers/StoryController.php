@@ -3,9 +3,11 @@
 use Illuminate\Http\Request;
 use Response;
 
+use DB;
 use Auth;
 use App\Models\Story;
 use App\Models\Sentence;
+use App\Models\Tag;
 
 class StoryController extends Controller {
 
@@ -30,6 +32,26 @@ class StoryController extends Controller {
 			return 'Not authorized';
 		}
 	}
+	public function postTag(Request $request, $id) {
+		if($request->user()) {
+			$story = Story::find($id);
+			if($story != null) {
+				if($story->owner()->id == $request->user()->id) {
+					$tag = new Tag;
+					$tag->story_id = $id;
+					$tag->value = $request->value;
+					$tag->save();
+					return Response::json(array('message' => 'Tag added.', 'id' => $tag->id));
+				} else {
+					return Response::json(array('message' => 'Ownership mismatch'));
+				}
+			} else {
+				return Response::json(array('message' => 'No story found.'));
+			}
+		} else {
+			return Response::json(array('message' => 'Not authorized'));
+		}
+	}
 	
 	public function postReply(Request $request, $id) {
 		if($request->user()) {
@@ -49,5 +71,26 @@ class StoryController extends Controller {
 		} else {
 			return Response::json(array('message' => 'Not authorized'));
 		}
+	}
+	
+	public function search(Request $request) {
+		$searchTerms = explode(',', $request->input('q'));
+
+	    $query = DB::table('sentences');
+	
+	    foreach($searchTerms as $term) {
+	        $query->orWhere('content', 'LIKE', '%'. $term .'%');
+	    }
+	
+	    $subresults = $query->select('story_id', DB::raw('count(*) as total'))->groupBy('story_id')->orderBy('total', 'DESC')->get();
+	    $results = array();
+	    foreach($subresults as $s) {
+		    $story = Story::find($s->story_id);
+		    if($story != null) {
+			    $story["root"] = $story->getRoot()->get();
+			    $results[] = $story;
+			}
+	    }
+	    return Response::json($results);
 	}
 }

@@ -8,7 +8,29 @@
 			<input type="submit" class="button new-prompt-submit" value="&#8594;" />
 		</form>
 	</div>
+	<h1 class="homepage-header">These 5 stories are fresh off the presses -- you'll LOL at number 4!</h1>
+	<?php foreach(App\Models\Story::orderBy('created_at', 'DESC')->take(5)->get() as $story): ?>
+	<div class="row story-tier">
+		<a href="/story/<?php echo e($story->id); ?>"><span class="sentence"><?php echo e($story->getRoot()->first()->content); ?></span></a>
+	</div> 
+	<?php endforeach; ?>
+	<hr/>
+	<h1 class="homepage-header">These fire stories are begging for your attention!</h1>
+	<?php foreach(DB::table('sentences')->select('story_id', DB::raw('count(*) as total'))->groupBy('story_id')->orderBy('total', 'DESC')->take(5)->get() as $data): ?>
+	<?php $story = App\Models\Story::find($data->story_id); ?>
+	<div class="row story-tier">
+		<a href="/story/<?php echo e($story->id); ?>"><span class="sentence"><?php echo e($story->getRoot()->first()->content); ?></span></a>
+	</div>
+	<?php endforeach; ?>
 </div>
 <?php $__env->stopSection(); ?>
 
+<?php $__env->startSection('script'); ?>
+<script>
+	function HomeVM() {
+		var self = this;
+
+	}
+</script>
+<?php $__env->stopSection(); ?>
 <?php echo $__env->make('app', array_except(get_defined_vars(), array('__data', '__path')))->render(); ?>

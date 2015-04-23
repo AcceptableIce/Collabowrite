@@ -11,6 +11,49 @@
 		self.comments = ko.observableArray([]);
 		self.commentsLoaded = ko.observable(false);
 		self.editingParentId = ko.observable(-1);
+		
+		self.tags = ko.observableArray(<?php echo json_encode($story->tags()->get()) ?>);
+		
+		self.getTags = function() {
+			var tagList = "";
+			for(var i = 0; i < self.tags().length; i++) {
+				tagList += self.tags()[i].value + ", ";
+			}
+			if(tagList.length == 0) tagList = "nothing  ";
+			return "Filed under " + tagList.substring(0, tagList.length - 2) + ".";
+		}
+		
+		self.editingTag = ko.observable(false);
+		self.editingTagValue = ko.observable("");
+		
+		self.editTag = function() {
+			self.editingTagValue("");
+			self.editingTag(true);
+		}
+		
+		self.submitTag = function() {
+			$.ajax('/api/v1/story/<?php echo e($story->id); ?>/tag', {
+				data: {
+					value: self.editingTagValue()
+				},
+				method: 'POST',
+				success: function(data) {
+					console.log('Tag submitted!');
+					self.tags.push({
+						value: self.editingTagValue(),
+					});
+					self.editingTagValue("");
+					self.editingTag(false);
+				},
+				error: function(jqXHR, textStatus, errorThrown) {
+					console.log('Comment submit error', jqXHR);
+				}
+			});
+		}
+		
+		self.cancelTag = function() {
+			self.editingTag(false);
+		}
 		//Modify the story tree to have observables
 	
 		function modifyStoryTree(root) {
@@ -148,7 +191,7 @@
 					success: function(data) {
 						console.log('Reply submitted!');
 						var tier = self.goToTier(self.editingTier());
-						tier.children.push({ content: self.editingValue(), selected: ko.observable(0), id: data.id, children: [] });
+						tier.children.push({ content: self.editingValue(), selected: ko.observable(0), id: data.id, children: [], comment_count: ko.observable(0)});
 						tier.selected(tier.children.length - 1);
 						self.cancelSentenceInput();
 						self.storyTree.valueHasMutated();
@@ -171,6 +214,17 @@
 <?php $__env->startSection('content'); ?>
 	<input type="hidden" id="user-name" value="<?php echo e(Auth::user() != null ? Auth::user()->name : 'Unauthed'); ?>" />
 	<div class="author-block">This is a story that was started <?php echo e($story->created_at->diffForHumans()); ?> by <?php echo e($story->owner()->name); ?>.</div>
+	<div class="tag-block">
+		<div data-bind="text: getTags()"></div>
+		<?php if(Auth::user() && $story->owner()->id == Auth::user()->id): ?>
+		<a data-bind="click: editTag, visible: !editingTag()">Add a Tag</a>
+		<div data-bind="visible: editingTag">
+			<input type="text" class="tag-entry" data-bind="value: editingTagValue" />
+			<div class="tag-submit button" data-bind="click: submitTag">Add</div>
+			<div class="tag-submit button" data-bind="click: cancelTag">Cancel</div>
+		</div>
+		<?php endif; ?>
+	</div>
 	<div class="story-block">
 		<!-- ko foreach: buildPath -->
 		<div class="story-tier" data-bind="css: {'tier-0': $index() == 0}">
@@ -182,7 +236,7 @@
 					<!-- /ko -->
 					<div class="button-container">
 						<div class="contained-button reply-to-tier" data-bind="click: function() { $root.startEditing($index(), $data.id) }">Reply</div>
-						<div class="contained-button reply-to-tier" data-bind="click: function() { $root.showComments($index(), $data.id) }, text: 'Comments (' + comment_count() + ')'">Comments</div>
+						<div class="contained-button reply-to-tier" data-bind="click: function() { $root.showComments($index(), $data.id) }, text: 'Comments (' + (typeof comment_count === 'function' ? comment_count() : comment_count) + ')'">Comments</div>
 					</div>
 					<!-- ko if: $index() > 0 -->
 						<div class="button tier-button tier-shift-right"  data-bind="click: function() { $root.shiftTier($index(), 1) }, css: {'disabled': $root.buildPath()[$index() - 1].children.length < 2}">&#8594;</div>

@@ -8,6 +8,9 @@ use App\User;
 class Story extends Model {
 	protected $table = 'stories';
 	
+	public function tags() {
+		return $this->hasMany('App\Models\Tag');
+	}
 	public function getRoot() {
 		return $this->hasMany('App\Models\Sentence')->where('sentence_id', 0);
 	}

@@ -1,7 +1,8 @@
-<?php
+`<?php
 use App\User;
 use App\Models\Story;
 use App\Models\Comment;
+use App\Models\Tag;
 use Symfony\Component\DomCrawler\Crawler;
 
 class ExampleTest extends TestCase {
@@ -79,9 +80,28 @@ class ExampleTest extends TestCase {
 		$response = $this->call('POST', '/api/v1/sentence/1/comment', ['content' => 'Test!', '_token' => $token]);
 		$newCommentId = json_decode($response->getContent())->id;
 		// there isn't currently a decent way to actually get the data that was returned, so just make sure it's ok
-		$this->assertResponseOk();
+		$this->assertNotEquals($newCommentId,null);
 
 		// delete it
 		Comment::find($newCommentId)->delete();
+	}
+	
+	public function testNewTag() {
+		Auth::loginUsingId(1);
+		$response = $this->call('GET', '/');
+		$this->assertResponseOk();
+		$html = $response->getContent();
+		// extract the csrf token
+
+		$crawler = new Crawler($html);
+		$token = $crawler->filter('input[name="_token"]')->attr('value');
+		
+		$response = $this->call('POST', '/api/v1/story/1/tag', ['value' => 'Test!', '_token' => $token]);
+		$newTagId = json_decode($response->getContent())->id;
+		// there isn't currently a decent way to actually get the data that was returned, so just make sure it's ok
+		$this->assertNotEquals($newTagId, null);
+
+		// delete it
+		Tag::find($newTagId)->delete();
 	}
 }

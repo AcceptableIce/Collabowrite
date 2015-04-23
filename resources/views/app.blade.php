@@ -6,7 +6,7 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<meta name="_token" content="{{ csrf_token() }}" />
 
-	<title>Laravel</title>
+	<title>Collabowrite</title>
 
 	<link href="{{ asset('/css/app.css') }}" rel="stylesheet">
 	<link href="{{ asset('/css/site.css') }}" rel="stylesheet">
@@ -33,7 +33,11 @@
 				<a class="navbar-brand" href="/">Collabowrite</a>
 			</div>
 
-			<div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+			<div class="input-group search-group">
+				<input type="text" class="form-control typeahead" placeholder="Search for a story...">
+			</div>
+
+			<div class="collapse navbar-collapse navbar-right" id="bs-example-navbar-collapse-1">
 				<ul class="nav navbar-nav">
 				</ul>
 
@@ -62,6 +66,9 @@
 	<script src="//cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.1/js/bootstrap.min.js"></script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/knockout/3.3.0/knockout-debug.js"></script>
 	<script src="{{ asset('/marked.js') }}"></script>
+	<script src="{{ asset('/typeahead.bundle.js') }}"></script>
+	<script src="{{ asset('/handlebars.js')}}"></script>
+	<script src="{{ asset('/search.js') }}"></script>
 	<script type="text/javascript">
 		$(function() {
 			$.ajaxSetup({

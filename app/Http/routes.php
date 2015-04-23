@@ -27,11 +27,12 @@ Route::get('/user/{id}', array('as' => 'user', function($id) {
 Route::group(['prefix' => 'api/v1'], function() {
 	Route::post('story', 'StoryController@postStory');
 	Route::post('story/{id}/reply', 'StoryController@postReply');
+	Route::post('story/{id}/tag', 'StoryController@postTag');
 	Route::get('sentence/{id}/comments', 'CommentController@getComments');
 	Route::post('sentence/{id}/comment', 'CommentController@postComment');
 	Route::put('comment/{id}', 'CommentController@putComment');
 	Route::post('user/{id}/profile', 'UserController@updateProfile');
-	Route::get('test', 'StoryController@testBuild');
+	Route::get('search', 'StoryController@search');
 });
 
 
