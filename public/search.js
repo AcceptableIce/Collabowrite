@@ -2,8 +2,9 @@ var stories = new Bloodhound({
 	datumTokenizer: Bloodhound.tokenizers.obj.whitespace('name'),
 	queryTokenizer: Bloodhound.tokenizers.whitespace,
 	limit: 10,
-	prefetch: {
-		url: '/api/v1/search',
+	remote: {
+		url: '/api/v1/search?q=%QUERY',
+		cache: false,
 		filter: function(list) {
 			return $.map(list, function(entry) { return {id: entry.root[0].story_id, name: entry.root[0].content}; });
 		}

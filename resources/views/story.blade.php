@@ -13,6 +13,9 @@
 		self.comments = ko.observableArray([]);
 		self.commentsLoaded = ko.observable(false);
 		self.editingParentId = ko.observable(-1);
+		self.compressed = ko.observable(false);
+		
+		self.locked = ko.observable({{$story->locked ? 'true' : 'false'}});
 		
 		self.tags = ko.observableArray(<?php echo json_encode($story->tags()->get()) ?>);
 		
@@ -55,6 +58,22 @@
 		
 		self.cancelTag = function() {
 			self.editingTag(false);
+		}
+		
+		self.toggleLock = function() {
+			@if(Auth::check() && Auth::user()->id == $story->owner()->id)
+			self.locked(!self.locked());
+			$.ajax('/api/v1/story/{{$story->id}}/lock', {
+				method: 'POST',
+				success: function(data) {
+					console.log('Lock toggled!');
+				},
+				error: function(jqXHR, textStatus, errorThrown) {
+					console.log('Lock toggle error', jqXHR);
+				}
+			});
+			@endif
+			
 		}
 		//Modify the story tree to have observables
 	
@@ -176,12 +195,13 @@
 			var clean = self.escapeHtml(raw);
 			return marked(clean);
 		}
-		
+				
 		self.cancelSentenceInput = function() {
 			self.editingValue("");
 			self.editingParentId(-1);
 			self.editingTier(-9);
 		}
+		
 		
 		self.submitSentenceInput = function() {
 			$.ajax('/api/v1/story/{{$story->id}}/reply', {
@@ -209,13 +229,22 @@
 		//Build the tree.
 	}
 	
-	ko.applyBindings(new storyVM());
+	ko.applyBindings(new storyVM(), document.getElementById('content-block'));
 	</script>
 @endsection
 
 @section('content')
+<div id="content-block">
 	<input type="hidden" id="user-name" value="{{Auth::user() != null ? Auth::user()->name : 'Unauthed'}}" />
 	<div class="author-block">This is a story that was started {{$story->created_at->diffForHumans()}} by {{$story->owner()->name}}.</div>
+	<div class="lock-block" data-bind="css: { 'locked': locked }, click: toggleLock">
+		<i class="fa fa-lock", data-bind="css: { 'fa-lock': locked(), 'fa-unlock': !locked() }"></i>
+		<span class="lock-block-text" data-bind="text: 'This story is ' + (locked() ? 'locked' : 'unlocked')"></span>
+	</div>
+	<div class="mode-block">
+		<a class="mode-selector" data-bind="css: { 'active': !compressed() }, click: function() { compressed(false) }">Normal</a>
+		<a class="mode-selector" data-bind="css: { 'active': compressed() },  click: function() { compressed(true) }">Compressed</a>		
+	</div>
 	<div class="tag-block">
 		<div data-bind="text: getTags()"></div>
 		@if(Auth::user() && $story->owner()->id == Auth::user()->id)
@@ -227,7 +256,7 @@
 		</div>
 		@endif
 	</div>
-	<div class="story-block">
+	<div class="story-block" data-bind="css: { 'compressed': compressed }">
 		<!-- ko foreach: buildPath -->
 		<div class="story-tier" data-bind="css: {'tier-0': $index() == 0}">
 			<div class="container">
@@ -237,7 +266,7 @@
 					<div class="button tier-button tier-shift-left" data-bind="click: function() { $root.shiftTier($index(), -1) }, css: {'disabled': $root.buildPath()[$index() - 1].children.length < 2}">&#8592;</div>
 					<!-- /ko -->
 					<div class="button-container">
-						<div class="contained-button reply-to-tier" data-bind="click: function() { $root.startEditing($index(), $data.id) }">Reply</div>
+						<div class="contained-button reply-to-tier" data-bind="click: function() { $root.startEditing($index(), $data.id) }, visible: !$root.locked()">Reply</div>
 						<div class="contained-button reply-to-tier" data-bind="click: function() { $root.showComments($index(), $data.id) }, text: 'Comments (' + (typeof comment_count === 'function' ? comment_count() : comment_count) + ')'">Comments</div>
 					</div>
 					<!-- ko if: $index() > 0 -->
@@ -272,7 +301,7 @@
 						</div>
 					</div>
 					<div class="loader" data-bind="visible: !$root.commentsLoaded()">
-						<span class="loader">Loading. Imagine something spinning here.</span>
+						<span class="loader"><i class="fa fa-spinner fa-pulse"></i></span>
 					</div>
 				</div>
 			</div>
@@ -289,4 +318,5 @@
 			</div>
 		</div>
 	</div>
+</div>
 @endsection

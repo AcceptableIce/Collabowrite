@@ -26,7 +26,7 @@ return [
 	|
 	*/
 
-	'url' => 'http://collabowrite.acceptableice.com',
+	'url' => 'http://collabowrite.maybreak.com',
 
 	/*
 	|--------------------------------------------------------------------------

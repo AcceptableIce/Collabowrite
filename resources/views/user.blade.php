@@ -69,13 +69,13 @@
 			return self;
 		}
 
-		ko.applyBindings(new UserVM());
+		ko.applyBindings(new UserVM(), document.getElementById("bind-me"));
 	</script>
 @endsection
 
 @section('content')
 <div id="description-input">{{$user->profile()->description}}</div>
-<div class="container user-container">
+<div class="container user-container" id="bind-me">
 	@if ($user == Auth::user())
 		<div class="row">
 			<h1 data-bind="text: name"></h1>

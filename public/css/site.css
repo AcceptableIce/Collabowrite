@@ -326,6 +326,7 @@ body {
 	text-align: center;
 	color: #fff;
 	font-size: 1.1em;
+	padding-bottom: 10px;
 }
 
 .tag-block a {
@@ -441,4 +442,227 @@ a:hover {
 .homepage-header {
 	color: white;
 	text-align: center;
+}
+
+
+.edit-panel {
+	position: absolute;
+	z-index: 1200;
+	background-color: #eaeaea;
+	width: 420px;
+	height: 300px;
+	border: 1px solid #c0c0c0;
+	right: 100px;
+	top: 50px;
+}
+
+.edit-panel-content {
+	width: 400px;
+	position: relative;
+	left: 10px;
+	top: 10px;
+	height: 280px;
+	background-color: #fff;
+	border: 1px solid #c0c0c0;
+	overflow-y: auto;
+	overflow-x: hidden;
+}
+
+.edit-panel-overlay {
+	user-select: none;
+	pointer-events: none;
+	position: absolute;
+	left: 10px;
+	top: 10px;
+	background-color: transparent;
+	width: 402px;
+	height: 282px;
+	z-index: 1500;
+    -webkit-box-shadow: inset 0px 0px 3px rgba(0, 0, 0, 0.25); /* Saf3-4, iOS 4.0.2 - 4.2, Android 2.3+ */
+       -moz-box-shadow: inset 0px 0px 3px rgba(0, 0, 0, 0.25);/* FF3.5 - 3.6 */
+            box-shadow: inset 0px 0px 3px rgba(0, 0, 0, 0.25); /* Opera 10.5, IE9, FF4+, Chrome 6+, iOS 5 */   
+}
+
+
+.edit-panel-list {
+	width: 400px;
+	height: 280px;
+	position: relative;
+}
+
+.edit-option {
+	position: relative;
+	padding: 10px 0px;
+
+}
+
+.edit-option:nth-child(2n) {
+	background-color: #f8f8f8;
+}
+
+.edit-option.error-option {
+	background-color: #f2dede;
+}
+
+.edit-option.success-option {
+	background-color: #dff0d8;
+}
+
+.edit-option-title {
+	font-size: 1.2em;
+	margin-left: 10px;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	overflow: hidden;
+	width: 380px;
+}
+
+.edit-option-desc {
+	font-size: 0.8em;
+	margin-top: 10px;
+	padding: 0px 10px;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	overflow: hidden;
+	width: 380px;
+}
+
+
+.navbar-envelope {
+	position: absolute;
+	font-size: 1.4em;
+	right: 100px;
+	top: 12px;	
+	color: #873030;	
+}
+
+.navbar-envelope.active {
+	color: #fff;
+}
+
+.envelope-badge {
+	width: 15px;
+	height: 15px;
+	background-color: #517da3;
+	border-radius: 50%;
+	color: #fff;
+	font-size: 0.5em;
+	position: relative;
+	text-align: center;
+	line-height: 15px;
+	top: -30px;	
+	left: 10px;
+}
+
+.hideOnLoad {
+	display: none;
+}
+
+.lock-block {
+	width: 200px;
+	height: 32px;
+	padding: 5px 10px;
+	position: absolute;
+	right: 20px;
+	top: 70px;
+	background-color: #93f6a7;
+	color: #076822;
+	border: 1px solid #076822;
+	border-radius: 3px;
+}
+
+.lock-block-text {
+	margin-left: 10px;
+}
+
+.lock-block.locked {
+	background-color: #f29894;
+	color: #751818;
+	border: 1px solid #751818;	
+}
+
+.compressed {
+	margin-top: 20px;
+}
+
+.compressed .story-tier {
+	display: inline-block;
+	min-height: 0;
+	padding: 5px 10px;
+}
+
+.compressed .story-tier .container {
+	width: auto;
+	min-width: 100px;
+}
+
+.compressed .story-sentence {
+	font-size: 20px;	
+}
+
+.compressed .reply-to-tier {
+	display: none;
+}
+
+.compressed .button-container {
+	display: none;
+	margin-top: -30px;
+}
+
+.compressed .tier-button {
+	margin-top: -25px;
+}
+
+.compressed .button {
+	width: 40px;
+	height: 25px;
+	line-height: 25px;
+	display: none;
+}
+
+.compressed .story-tier:hover .button {
+	display: block;
+}
+
+
+.compressed .tier-0 {
+	min-height: 0;
+}
+
+.mode-block {
+	width: 200px;
+	height: 43px;
+	padding: 5px 10px;
+	position: fixed;
+	left: 20px;
+	top: 70px;
+	color: #fff;
+	border: 1px solid #ffa3a3;
+	background-color: #AB3232;
+	z-index: 99;	
+	padding-top: 12px;
+	display: block;
+}
+
+.mode-block::before {
+	content: 'MODE';
+	font-size: 0.8em;
+	position: absolute;
+	display: block;
+	background-color: #AB3232;
+	top: -8px;
+	left: 10px;
+}
+
+.mode-selector {
+	cursor: pointer;
+	margin-right: 5px;
+
+}
+
+.mode-selector.active {
+	background-color: #fff;
+	color: #AB3232;
+	border-radius: 4px;
+	padding: 2px 4px;
 }

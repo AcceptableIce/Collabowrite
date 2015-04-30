@@ -8,9 +8,29 @@ use Auth;
 use App\Models\Story;
 use App\Models\Sentence;
 use App\Models\Tag;
+use App\Models\ReplyReceipt;
 
 class StoryController extends Controller {
 
+	public function toggleLock(Request $request, $id) {
+		if($request->user()) {
+			$story = Story::find($id);
+			if($story != null) {
+				if($story->owner()->id == $request->user()->id) {
+					$story->locked = !$story->locked;
+					$story->save();
+					return Response::json(array('message' => 'Lock toggled.'));
+				} else {
+					return Response::json(array('message' => 'Ownership mismatch'));
+				}
+			} else {
+				return Response::json(array('message' => 'No story found.'));
+			}
+		} else {
+			return 'Not authorized';
+		}
+	}
+	
 	public function postStory(Request $request) {
 		if($request->user()) {
 			$user_id = $request->user()->id;
@@ -57,14 +77,30 @@ class StoryController extends Controller {
 		if($request->user()) {
 			$story = Story::find($id);
 			if($story != null) {
-				//Add check to see if reply to this level has already happened.
-				$sentence = new Sentence;
-				$sentence->user_id = $request->user()->id;
-				$sentence->story_id = $id;
-				$sentence->sentence_id = $request->sentence_id;
-				$sentence->content = $request->reply;
-				$sentence->save();
-				return Response::json(array('message' => 'Reply submitted.', 'id' => $sentence->id));
+				//Only allow replies to unlocked stories
+				if(!$story->locked) {
+					//Add check to see if reply to this level has already happened.
+					$sentence = new Sentence;
+					$sentence->user_id = $request->user()->id;
+					$sentence->story_id = $id;
+					$sentence->sentence_id = $request->sentence_id;
+					$sentence->content = $request->reply;
+					$sentence->save();
+					
+					$parent_id = Sentence::find($request->sentence_id)->owner()->id;
+					if($parent_id != $request->user()->id) {
+						$reply = new ReplyReceipt;
+						$reply->user_id = $parent_id;
+						$reply->sentence_id = $request->sentence_id;
+						$reply->reply_id = $sentence->id;
+						$reply->seen = false;
+						$reply->save();
+					}
+					
+					return Response::json(array('message' => 'Reply submitted.', 'id' => $sentence->id));
+				} else {
+					return Response::json(array('message' => 'Story locked'));
+				}
 			} else {
 				return Response::json(array('message' => 'No story found.'));
 			}
@@ -83,6 +119,12 @@ class StoryController extends Controller {
 	    }
 	
 	    $subresults = $query->select('story_id', DB::raw('count(*) as total'))->groupBy('story_id')->orderBy('total', 'DESC')->get();
+	    //Add tag results
+	    foreach(Tag::where('value', 'LIKE', '%'. $term .'%')->get() as $t) {
+		    $subObj = new \stdClass();
+		    $subObj->story_id = $t->story()->id;
+		    $subresults[] = $subObj;
+		}
 	    $results = array();
 	    foreach($subresults as $s) {
 		    $story = Story::find($s->story_id);

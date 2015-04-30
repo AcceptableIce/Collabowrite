@@ -3,6 +3,7 @@ use App\User;
 use App\Models\Story;
 use App\Models\Comment;
 use App\Models\Tag;
+use App\Models\ReplyReceipt;
 use Symfony\Component\DomCrawler\Crawler;
 
 class ExampleTest extends TestCase {
@@ -67,6 +68,11 @@ class ExampleTest extends TestCase {
 		Story::find($newStoryId)->delete();
 	}
 	
+	/**
+	 * Logs in and attempts to post a new comment.
+	 *
+	 * @return void
+	 */
 	public function testNewComment() {
 		Auth::loginUsingId(2);
 		$response = $this->call('GET', '/');
@@ -86,6 +92,11 @@ class ExampleTest extends TestCase {
 		Comment::find($newCommentId)->delete();
 	}
 	
+	/**
+	 * Logs in and attempts to add a tag to a story.
+	 *
+	 * @return void
+	 */
 	public function testNewTag() {
 		Auth::loginUsingId(1);
 		$response = $this->call('GET', '/');
@@ -103,5 +114,53 @@ class ExampleTest extends TestCase {
 
 		// delete it
 		Tag::find($newTagId)->delete();
+	}
+
+	/**
+	 * Logs in and attempts to create, read, and mark a notification as read.
+	 *
+	 * @return void
+	 */
+	public function testReadReceipts() {
+		Auth::loginUsingId(1);
+
+		$response = $this->call('GET', '/');
+		$this->assertResponseOk();
+		$html = $response->getContent();
+		// extract the csrf token
+
+		$crawler = new Crawler($html);
+		$token = $crawler->filter('input[name="_token"]')->attr('value');
+
+		$receipt = new ReplyReceipt();
+		// because it would make too much sense to put this in the constructor
+		$receipt->user_id = 1;
+		$receipt->sentence_id = 1;
+		$receipt->reply_id = 1;
+		$receipt->seen = false;
+
+		$receipt->save();
+		$receipt->update();
+
+		$this->assertFalse($receipt->seen);
+
+		$response = $this->call('GET', '/api/v1/receipts/unread');
+		$unread = json_decode($response->getContent());
+		$found = false;
+		// find a read receipt matching the one we just added
+		foreach ($unread as $response_receipt) {
+			if($response_receipt->user_id == 1 && $response_receipt->sentence_id == 1 && $response_receipt->reply_id == 1) {
+				$found = true;
+				// "read" the receipts
+				$response = $this->call('POST', '/api/v1/receipt/'.$response_receipt->id.'/read', ['_token' => $token]);
+				// make sure the receipts are "read" properly
+				$this->assertEquals($response->getContent(), '{"message":"Receipt cleared."}');
+			}
+		}
+		$this->assertTrue($found);
+
+		// make sure we have no unread notifications now
+		$response = $this->call('GET', '/api/v1/receipts/unread');
+		$this->assertEquals($response->getContent(), '[]');
 	}
 }
